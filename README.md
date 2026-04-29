@@ -58,17 +58,22 @@ AgentFaceOff sends the same prompt to two AI agents simultaneously, streams thei
 
 ## Model Lineup
 
-| Model | Key | Provider | Tier |
-|-------|-----|----------|------|
-| Llama 4 Scout | `groq-llama-4-scout` | Groq | Free |
-| Llama 3.1 8B | `groq-llama-3.1-8b` | Groq | Free |
-| Llama 3.3 70B | `groq-llama-3.3-70b` | Groq | Free |
-| DeepSeek R1 Distill 70B | `groq-deepseek-r1-distill-70b` | Groq | Free |
-| Gemma 2 9B | `groq-gemma-2-9b` | Groq | Free |
-| DeepSeek R1 | `deepseek-r1` | OpenRouter | Free |
-| Qwen3 235B | `qwen3-235b` | OpenRouter | Free |
+29 free models across two providers — see [`backend/app/models/registry.py`](backend/app/models/registry.py) for the full list.
 
-Default judge: **Llama 3.3 70B**
+**Groq (4 — fastest, sub-second first token):**
+Llama 4 Scout · Llama 3.3 70B · Llama 3.1 8B · Qwen3 32B
+
+**OpenRouter free tier (25):**
+- Google: Gemma 4 31B/26B, Gemma 3 27B/12B/4B
+- NVIDIA: Nemotron 3 Super, Nemotron Nano 30B/12B-VL/9B/Omni
+- Meta: Llama 3.3 70B, Llama 3.2 3B
+- Qwen: Qwen3 Next 80B, Qwen3 Coder 480B
+- OpenAI: gpt-oss-120b, gpt-oss-20b
+- Plus Hermes 3 405B, GLM 4.5 Air, MiniMax M2.5, Tencent Hy3, Ling 2.6 1T, Poolside Laguna XS.2/M.1, LFM2.5 Thinking/Instruct, Venice Uncensored
+
+> **Performance tip:** Groq models stream in ~1–2s. OpenRouter free models share rate-limited capacity and can take 30–90s on the first response — pick Groq on both sides for snappy battles.
+
+Default judge: **Llama 3.1 8B (Groq)**
 
 ---
 
