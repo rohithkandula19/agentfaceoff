@@ -32,7 +32,8 @@ else
   echo "Creating Cloud SQL instance (takes ~5 min)…"
   gcloud sql instances create "$INSTANCE" \
     --database-version=POSTGRES_16 \
-    --tier=db-f1-micro \
+    --edition=ENTERPRISE \
+    --tier=db-g1-small \
     --region="$REGION" \
     --no-backup
   echo "✓ Cloud SQL instance created"
