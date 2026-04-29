@@ -96,8 +96,31 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
   --member="serviceAccount:${CB_SA}" \
   --role="roles/secretmanager.secretAccessor" --quiet
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:${CB_SA}" \
+  --role="roles/storage.admin" --quiet
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:${CB_SA}" \
+  --role="roles/run.admin" --quiet
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
   --member="serviceAccount:${CR_SA}" \
   --role="roles/secretmanager.secretAccessor" --quiet
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:${CR_SA}" \
+  --role="roles/storage.admin" --quiet
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:${CR_SA}" \
+  --role="roles/artifactregistry.writer" --quiet
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:${CR_SA}" \
+  --role="roles/logging.logWriter" --quiet
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+  --member="serviceAccount:${CR_SA}" \
+  --role="roles/run.admin" --quiet
+
+# Allow compute SA to deploy Cloud Run services (actAs itself)
+gcloud iam service-accounts add-iam-policy-binding "${CR_SA}" \
+  --member="serviceAccount:${CR_SA}" \
+  --role="roles/iam.serviceAccountUser" --quiet
 gcloud projects add-iam-policy-binding "$PROJECT_ID" \
   --member="serviceAccount:${CR_SA}" \
   --role="roles/cloudsql.client" --quiet

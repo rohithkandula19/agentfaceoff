@@ -1,18 +1,21 @@
+substitutions:
+  _TAG: latest   # overridden by trigger with $COMMIT_SHA; fine for manual builds
+
 steps:
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - build
       - -t
-      - gcr.io/$PROJECT_ID/agentfaceoff-backend:$COMMIT_SHA
+      - us-central1-docker.pkg.dev/$PROJECT_ID/agentfaceoff-backend/backend:${_TAG}
       - -t
-      - gcr.io/$PROJECT_ID/agentfaceoff-backend:latest
+      - us-central1-docker.pkg.dev/$PROJECT_ID/agentfaceoff-backend/backend:latest
       - .
     dir: backend
 
-  # Push image to Container Registry
+  # Push image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: [push, gcr.io/$PROJECT_ID/agentfaceoff-backend, --all-tags]
+    args: [push, us-central1-docker.pkg.dev/$PROJECT_ID/agentfaceoff-backend/backend, --all-tags]
 
   # Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -21,7 +24,7 @@ steps:
       - run
       - deploy
       - agentfaceoff-backend
-      - --image=gcr.io/$PROJECT_ID/agentfaceoff-backend:$COMMIT_SHA
+      - --image=us-central1-docker.pkg.dev/$PROJECT_ID/agentfaceoff-backend/backend:${_TAG}
       - --region=us-central1
       - --platform=managed
       - --allow-unauthenticated
@@ -36,5 +39,5 @@ steps:
       - --add-cloudsql-instances=$PROJECT_ID:us-central1:agentfaceoff-postgres
 
 images:
-  - gcr.io/$PROJECT_ID/agentfaceoff-backend:$COMMIT_SHA
-  - gcr.io/$PROJECT_ID/agentfaceoff-backend:latest
+  - us-central1-docker.pkg.dev/$PROJECT_ID/agentfaceoff-backend/backend:${_TAG}
+  - us-central1-docker.pkg.dev/$PROJECT_ID/agentfaceoff-backend/backend:latest
