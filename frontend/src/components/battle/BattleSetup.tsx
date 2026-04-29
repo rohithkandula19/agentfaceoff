@@ -207,25 +207,25 @@ export default function BattleSetup({ onStart, isConnecting }: Props) {
           {/* Model / strategy selectors */}
           {(mode === 'model_vs_model' || mode === 'adversarial_debate') && (
             <>
-              <InlineSelect
+              <ModelSelect
                 badge="A" accent
                 value={modelA} onChange={setModelA}
-                options={models.filter((m) => m.key !== modelB).map((m) => ({ value: m.key, label: m.display_name }))}
+                models={models.filter((m) => m.key !== modelB)}
               />
               <span className="text-xs font-bold text-muted">vs</span>
-              <InlineSelect
+              <ModelSelect
                 badge="B"
                 value={modelB} onChange={setModelB}
-                options={models.filter((m) => m.key !== modelA).map((m) => ({ value: m.key, label: m.display_name }))}
+                models={models.filter((m) => m.key !== modelA)}
               />
             </>
           )}
 
           {mode === 'strategy_vs_strategy' && (
             <>
-              <InlineSelect
+              <ModelSelect
                 value={strategyModel} onChange={setStrategyModel}
-                options={models.map((m) => ({ value: m.key, label: m.display_name }))}
+                models={models}
                 placeholder="Model"
               />
               <span className="text-xs font-bold text-muted">:</span>
@@ -423,6 +423,59 @@ function InlineSelect({ value, onChange, options, badge, accent, placeholder }: 
         {options.map((o) => (
           <option key={o.value} value={o.value}>{o.label}</option>
         ))}
+      </select>
+    </div>
+  )
+}
+
+interface ModelSelectProps {
+  value: string
+  onChange: (v: string) => void
+  models: ModelInfo[]
+  badge?: string
+  accent?: boolean
+  placeholder?: string
+}
+
+function ModelSelect({ value, onChange, models, badge, accent, placeholder }: ModelSelectProps) {
+  const groq = models.filter((m) => m.provider === 'groq')
+  const openrouter = models.filter((m) => m.provider === 'openrouter')
+  const selected = models.find((m) => m.key === value)
+
+  return (
+    <div className="flex items-center gap-1.5 bg-white border border-border rounded-lg px-2.5 py-1 shrink-0">
+      {badge && (
+        <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-black
+                         text-white shrink-0 ${accent ? 'bg-accent' : 'bg-text'}`}>
+          {badge}
+        </span>
+      )}
+      {selected?.provider === 'groq' && (
+        <span title="Groq — fast inference (~1–2s)" className="text-[10px] leading-none">⚡</span>
+      )}
+      <select
+        className="text-xs text-text bg-transparent outline-none cursor-pointer max-w-[160px]"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        title={selected?.provider === 'openrouter'
+          ? 'OpenRouter free — can take 30–90s'
+          : 'Groq — sub-2s responses'}
+      >
+        {placeholder && <option value="" disabled>{placeholder}</option>}
+        {groq.length > 0 && (
+          <optgroup label="⚡ Groq — Fast">
+            {groq.map((m) => (
+              <option key={m.key} value={m.key}>{m.display_name}</option>
+            ))}
+          </optgroup>
+        )}
+        {openrouter.length > 0 && (
+          <optgroup label="🐢 OpenRouter Free — Slow">
+            {openrouter.map((m) => (
+              <option key={m.key} value={m.key}>{m.display_name}</option>
+            ))}
+          </optgroup>
+        )}
       </select>
     </div>
   )

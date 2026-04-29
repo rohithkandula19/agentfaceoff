@@ -325,6 +325,7 @@ async def list_available_models(tier: Optional[str] = None):
                 "display_name": m.display_name,
                 "family": m.family,
                 "tier": m.tier,
+                "provider": m.provider,
                 "description": m.description,
                 "context_window": m.context_window,
             }

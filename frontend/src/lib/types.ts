@@ -3,6 +3,7 @@ export interface ModelInfo {
   display_name: string
   family: string
   tier: 'FREE' | 'PAID'
+  provider: 'groq' | 'openrouter'
   description: string
   context_window: number
 }
