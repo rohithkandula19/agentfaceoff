@@ -1,26 +1,110 @@
-# AgentFaceOff
+<div align="center">
 
-> Two agents. One prompt. One winner.
+# ⚔️ AgentFaceOff
 
-A public LLM evaluation platform where two AI agents go head-to-head on the same prompt and an LLM judge picks the winner. Three battle modes, WebSocket live streaming, and a structured rubric verdict — built as a portfolio project demonstrating LangGraph, parallel agent execution, and structured LLM evaluation.
+**Two AI agents. One prompt. One winner.**
+
+A live LLM evaluation platform where models battle head-to-head in real time — with WebSocket streaming, an LLM judge, and a structured rubric verdict.
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-agent--face--off.web.app-orange?style=for-the-badge)](https://agent-face-off.web.app)
+[![Backend](https://img.shields.io/badge/Backend-Cloud%20Run-blue?style=for-the-badge&logo=googlecloud)](https://agentfaceoff-backend-ksknjekvfa-uc.a.run.app/health)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+
+</div>
+
+---
+
+## What it does
+
+AgentFaceOff sends the same prompt to two AI agents simultaneously, streams their responses live side-by-side, then calls an LLM judge to score each response on **accuracy, reasoning, clarity, and completeness** — and picks a winner.
+
+### Battle Modes
+
+| Mode | Description |
+|------|-------------|
+| **Model vs Model** | Same prompt, different models — streamed in parallel via LangGraph |
+| **Strategy vs Strategy** | Same model, different system prompts (ReAct vs Plan-and-Execute, etc.) |
+| **Adversarial Debate** | Multi-round critique and refinement between two agents |
+
+### Features
+
+- **Live token streaming** — responses appear character-by-character in a split-screen
+- **Live web search** — Tavily fetches real-time context injected into both agents equally
+- **Search image strip** — images from web results displayed above the response panes
+- **Blind mode** — models hidden until you vote; see if your intuition matches the judge
+- **Dual-pass judging** — two independent judge calls eliminate position bias
+- **Follow-up chat** — continue the conversation with both agents after the verdict
+- **Battle history** — every battle persisted to Postgres with share-via-URL
+- **Leaderboard** — win/loss/tie stats per model across all battles
+- **Auth** — JWT-based signup/login; history and leaderboard gated to logged-in users
+- **Rate limiting** — per-IP daily cap to prevent abuse
+
+---
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | FastAPI + LangGraph 0.2+ + Python 3.12 |
-| LLM Provider | OpenRouter (OpenAI-compatible, 7 free models) |
-| Frontend | React 18 + Vite + TypeScript + Tailwind CSS |
-| Database | PostgreSQL 16 (asyncpg + SQLAlchemy 2.0) |
-| Deployment | GCP Cloud Run (backend) + Firebase Hosting (frontend) |
+| **Backend** | FastAPI · LangGraph 0.2 · Python 3.12 |
+| **LLM Providers** | Groq (primary) · OpenRouter (extended models) |
+| **Web Search** | Tavily API (parallel text + image queries) |
+| **Frontend** | React 18 · Vite · TypeScript · Tailwind CSS |
+| **Database** | PostgreSQL 16 · SQLAlchemy 2.0 async · asyncpg |
+| **Auth** | JWT (python-jose) · bcrypt password hashing |
+| **Deployment** | GCP Cloud Run (backend) · Firebase Hosting (frontend) · Cloud SQL |
+| **CI/CD** | GCP Cloud Build · Artifact Registry |
 
-## Battle Modes
+---
 
-| Mode | Description |
-|------|-------------|
-| **Model vs Model** | Same prompt, different models — parallel streaming via LangGraph Send API |
-| **Strategy vs Strategy** | Same model, ReAct vs Plan-and-Execute system prompts |
-| **Adversarial Debate** | N rounds of critique and refinement between two models |
+## Model Lineup
+
+| Model | Key | Provider | Tier |
+|-------|-----|----------|------|
+| Llama 4 Scout | `groq-llama-4-scout` | Groq | Free |
+| Llama 3.1 8B | `groq-llama-3.1-8b` | Groq | Free |
+| Llama 3.3 70B | `groq-llama-3.3-70b` | Groq | Free |
+| DeepSeek R1 Distill 70B | `groq-deepseek-r1-distill-70b` | Groq | Free |
+| Gemma 2 9B | `groq-gemma-2-9b` | Groq | Free |
+| DeepSeek R1 | `deepseek-r1` | OpenRouter | Free |
+| Qwen3 235B | `qwen3-235b` | OpenRouter | Free |
+
+Default judge: **Llama 3.3 70B**
+
+---
+
+## Project Structure
+
+```
+agentfaceoff/
+├── backend/
+│   ├── app/
+│   │   ├── agents/        # stream_agent_call, strategy system prompts
+│   │   ├── judge/         # call_judge, Verdict schema, dual-pass bias mitigation
+│   │   ├── graphs/        # mode1.py (Send API fan-out), mode3.py (debate loop)
+│   │   ├── models/        # MODEL_REGISTRY with FREE/PAID tiers
+│   │   ├── services/      # search.py — Tavily parallel text + image fetch
+│   │   ├── api/           # ws_battles.py (WebSocket), battles.py (REST + history)
+│   │   ├── auth/          # JWT router, bcrypt utils, schemas
+│   │   ├── db/            # SQLAlchemy 2.0 async models, crud, session
+│   │   └── core/          # config (pydantic-settings), rate limiter (per-IP)
+│   ├── Dockerfile         # Multi-stage, non-root user, PORT env var
+│   ├── cloudbuild.yaml    # GCP Cloud Build → Artifact Registry → Cloud Run
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── components/battle/   # BattleSetup, SplitScreen, DebateThread,
+│   │   │                        # VerdictCard, FollowUpChat, AgentPane
+│   │   ├── lib/hooks/           # useBattle (useReducer WS state machine)
+│   │   │                        # useFollowUp (follow-up chat streaming)
+│   │   ├── pages/               # Landing, BattlePage, HistoryPage,
+│   │   │                        # LeaderboardPage, LoginPage, SignupPage
+│   │   └── lib/                 # api.ts, types.ts, auth.ts, AuthContext
+│   ├── firebase.json      # SPA rewrites + security headers + asset caching
+│   └── .firebaserc
+├── docker-compose.yml     # Local dev: Postgres + backend with hot-reload
+├── setup-gcp.sh           # One-time GCP bootstrap script
+└── docs/ARCHITECTURE.md
+```
 
 ---
 
@@ -28,10 +112,10 @@ A public LLM evaluation platform where two AI agents go head-to-head on the same
 
 ### Prerequisites
 
-- Python 3.12
+- Python 3.12+
 - Node 20+
 - Docker & Docker Compose
-- An [OpenRouter](https://openrouter.ai) API key (`sk-or-v1-…`)
+- A [Groq](https://console.groq.com) API key (free)
 
 ### 1. Start Postgres
 
@@ -46,198 +130,118 @@ cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-cp .env.example .env
-# Edit .env — set OPENROUTER_API_KEY=sk-or-v1-...
-# DATABASE_URL is already set for local docker compose
-
-uvicorn app.main:app --reload --port 8000
+# Copy and fill in your keys
+cp .env.example .env   # see Environment Variables section below
 ```
 
-Verify: `curl http://localhost:8000/health`
+Create `backend/.env`:
+```env
+GROQ_API_KEY=gsk_...
+DATABASE_URL=postgresql://agentfaceoff:agentfaceoff@localhost:5432/agentfaceoff
+APP_ENV=development
+ALLOWED_ORIGINS=http://localhost:5173
+JWT_SECRET=any-random-string-for-local-dev
+TAVILY_API_KEY=tvly-...        # optional — web search
+OPENROUTER_API_KEY=sk-or-...   # optional — extra models
+```
+
+```bash
+uvicorn app.main:app --reload --port 8001
+```
+
+Health check: `curl http://localhost:8001/health`
 
 ### 3. Frontend
 
 ```bash
 cd frontend
 npm install
-# Create frontend/.env.local:
-echo "VITE_API_URL=http://localhost:8000" > .env.local
-echo "VITE_WS_URL=ws://localhost:8000" >> .env.local
+
+# Create frontend/.env.local
+echo "VITE_API_URL=http://localhost:8001" > .env.local
+echo "VITE_WS_URL=ws://localhost:8001" >> .env.local
+
 npm run dev
 ```
 
-Open http://localhost:5173
-
-### 4. Full stack with Docker Compose
-
-```bash
-# Backend + Postgres only (frontend runs with Vite hot-reload separately)
-docker compose up --build
-```
+Open **http://localhost:5173**
 
 ---
 
-## Deploy to GCP + Firebase
+## Deploying to GCP
 
-### Prerequisites
-
-- [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) (`gcloud`)
-- [Firebase CLI](https://firebase.google.com/docs/cli) (`npm install -g firebase-tools`)
-- A GCP project with Cloud Run, Cloud Build, and Container Registry APIs enabled
-- A Firebase project linked to the same GCP project
-
-### Backend — GCP Cloud Run
-
-#### Option A: Cloud Build (CI/CD)
-
-Connect your GitHub repo to Cloud Build and it will automatically trigger on push. The `backend/cloudbuild.yaml` handles everything:
+### One-time setup
 
 ```bash
-# One-time manual trigger:
-gcloud builds submit --config backend/cloudbuild.yaml \
-  --project YOUR_GCP_PROJECT_ID \
-  --substitutions _COMMIT_SHA=$(git rev-parse --short HEAD)
+gcloud auth login        # use your GCP account
+bash setup-gcp.sh        # creates Cloud SQL, Secret Manager entries, IAM roles
 ```
 
-#### Option B: Manual deploy script
+The script will prompt for your API keys and a DB password — everything else is automated.
+
+### Deploy backend
 
 ```bash
-# Set your project
-export PROJECT_ID=your-gcp-project-id
-export REGION=us-central1
-
-# Build and push
-docker build -t gcr.io/$PROJECT_ID/agentfaceoff-backend:latest ./backend
-docker push gcr.io/$PROJECT_ID/agentfaceoff-backend:latest
-
-# Deploy to Cloud Run
-gcloud run deploy agentfaceoff-backend \
-  --image=gcr.io/$PROJECT_ID/agentfaceoff-backend:latest \
-  --region=$REGION \
-  --platform=managed \
-  --allow-unauthenticated \
-  --memory=2Gi \
-  --cpu=1 \
-  --min-instances=0 \
-  --max-instances=10 \
-  --concurrency=80 \
-  --timeout=300 \
-  --set-env-vars="APP_ENV=production,MAX_CONCURRENT_BATTLES=5,PER_IP_DAILY_LIMIT=20" \
-  --set-secrets="OPENROUTER_API_KEY=openrouter-api-key:latest,DATABASE_URL=database-url:latest"
+gcloud builds submit --config backend/cloudbuild.yaml
 ```
 
-> Store secrets in [Secret Manager](https://cloud.google.com/secret-manager): `openrouter-api-key` and `database-url`.
-
-After deploy, note the Cloud Run URL (e.g. `https://agentfaceoff-backend-xxxx-uc.a.run.app`).
-
-### Frontend — Firebase Hosting
+### Deploy frontend
 
 ```bash
+# Get the Cloud Run URL
+BACKEND=$(gcloud run services describe agentfaceoff-backend \
+  --region=us-central1 --format='value(status.url)')
+
 cd frontend
-
-# Build with production API URL
-VITE_API_URL=https://agentfaceoff-backend-xxxx-uc.a.run.app \
-VITE_WS_URL=wss://agentfaceoff-backend-xxxx-uc.a.run.app \
-npm run build
-
-# Deploy
-firebase login
-firebase use agentfaceoff   # or: firebase use --add
+VITE_API_URL=$BACKEND VITE_WS_URL=${BACKEND/https/wss} npm run build
 firebase deploy --only hosting
 ```
-
-The `frontend/firebase.json` is already configured with:
-- SPA rewrites (`**` → `/index.html`)
-- Immutable cache headers for hashed assets
-- Security headers (X-Frame-Options, X-XSS-Protection, X-Content-Type-Options)
 
 ---
 
 ## Environment Variables
 
-### Backend (`.env`)
+### Backend
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `OPENROUTER_API_KEY` | **Yes** | — | OpenRouter API key |
-| `DATABASE_URL` | **Yes** | — | PostgreSQL connection string |
-| `APP_ENV` | No | `development` | `development` or `production` |
-| `ALLOWED_ORIGINS` | No | `*` | Comma-separated CORS origins |
-| `MAX_CONCURRENT_BATTLES` | No | `5` | Concurrent battle cap |
-| `PER_IP_DAILY_LIMIT` | No | `20` | Max battles per IP per day |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GROQ_API_KEY` | **Yes** | Groq API key (`gsk_…`) |
+| `DATABASE_URL` | **Yes** | PostgreSQL connection string |
+| `JWT_SECRET` | **Yes** | Secret for signing JWT tokens |
+| `APP_ENV` | No | `development` or `production` |
+| `ALLOWED_ORIGINS` | No | Comma-separated CORS origins |
+| `TAVILY_API_KEY` | No | Enables live web search |
+| `OPENROUTER_API_KEY` | No | Enables OpenRouter model tier |
+| `MAX_CONCURRENT_BATTLES` | No | Default `5` |
+| `PER_IP_DAILY_LIMIT` | No | Default `20` |
 
-### Frontend (`.env.local`)
+### Frontend
 
 | Variable | Description |
 |----------|-------------|
 | `VITE_API_URL` | Backend base URL (no trailing slash) |
-| `VITE_WS_URL` | Backend WebSocket base URL (`ws://` or `wss://`) |
+| `VITE_WS_URL` | Backend WebSocket URL (`ws://` or `wss://`) |
 
 ---
 
-## Free Model Lineup
+## How Judging Works
 
-| Display Name | Key | Family |
-|---|---|---|
-| DeepSeek R1 | `deepseek-r1` | DeepSeek |
-| Llama 3.3 70B | `llama-3.3-70b` | Meta |
-| Qwen3 Coder 480B | `qwen3-coder` | Qwen |
-| GPT-OSS 120B | `gpt-oss-120b` | OpenAI OSS |
-| Gemma 3 27B | `gemma-3-27b` | Google |
-| Mistral Small 3 | `mistral-small-3` | Mistral |
-| Nemotron Super | `nemotron-super` | NVIDIA |
-
-Default judge: **Llama 3.3 70B**
+1. Both agents receive the same prompt simultaneously
+2. Responses are streamed live over WebSocket
+3. Once both finish, a judge LLM scores each response on four dimensions (0–10 each):
+   - **Accuracy** — factual correctness
+   - **Reasoning** — logical depth and structure
+   - **Clarity** — readability and organisation
+   - **Completeness** — coverage of the question
+4. The agent with the higher total score wins. A tie is declared only when scores are exactly equal.
+5. **Dual-pass mode** runs two independent judge calls with reversed agent order — the verdict is accepted only when both agree, eliminating position bias.
 
 ---
 
-## Project Structure
+## Architecture Notes
 
-```
-agentfaceoff/
-├── backend/
-│   ├── app/
-│   │   ├── agents/          # stream_agent_call, strategy system prompts
-│   │   ├── judge/           # call_judge, Verdict schema, dual-pass bias mitigation
-│   │   ├── graphs/          # mode1.py (Send API fan-out), mode3.py (debate loop)
-│   │   ├── models/          # MODEL_REGISTRY (FREE/PAID tiers)
-│   │   ├── api/             # ws_battles.py (WebSocket), battles.py (REST + history)
-│   │   ├── db/              # SQLAlchemy 2.0 async models, crud, session
-│   │   └── core/            # config (pydantic-settings), rate_limit (per-IP daily)
-│   ├── Dockerfile           # Multi-stage, non-root user, HEALTHCHECK
-│   ├── cloudbuild.yaml      # GCP Cloud Build CI/CD pipeline
-│   └── requirements.txt
-├── frontend/
-│   ├── src/
-│   │   ├── components/battle/  # BattleSetup, SplitScreen, DebateThread, VerdictCard
-│   │   ├── lib/hooks/          # useBattle (useReducer state machine)
-│   │   ├── pages/              # Landing, BattlePage, HistoryPage
-│   │   └── lib/                # api.ts, types.ts
-│   ├── firebase.json
-│   └── .firebaserc
-├── docker-compose.yml       # Local dev (Postgres + backend hot-reload)
-└── docs/
-    └── ARCHITECTURE.md
-```
-
-## Bias Mitigation
-
-The judge always receives agent responses in randomised order. With `dual_pass: true`, two independent judge calls are made (one per ordering); the verdict is accepted only when both agree — otherwise a tie is declared.
-
-## Rate Limiting
-
-Per-IP daily counter (in-memory, auto-cleans stale days). Enforced on both the REST endpoint (`POST /api/battles`) and the WebSocket handler. Configurable via `PER_IP_DAILY_LIMIT` env var (default 20).
-
-## Share-via-URL
-
-Every completed battle is persisted to Postgres. Clicking "Copy Link" on the verdict card copies `https://yoursite.com/battle?id=<uuid>`. Anyone opening that URL sees the full battle — prompt, both responses, and the judge verdict.
-
----
-
-## Build Phases
-
-- [x] **Phase 1** — Backend skeleton (model registry, agents, judge, Mode 1 LangGraph, REST API)
-- [x] **Phase 2** — WebSocket streaming + Postgres persistence
-- [x] **Phase 3** — React frontend (split-screen, live token streaming, verdict radar chart)
-- [x] **Phase 4** — Modes 2 & 3 (Strategy vs Strategy, Adversarial Debate)
-- [x] **Phase 5** — Rate limiting, history page, share URLs, GCP Cloud Run + Firebase deploy
+- **WebSocket state machine** — `useBattle.ts` uses `useReducer` with phases: `idle → connecting → searching → streaming → judging → verdict`
+- **LangGraph fan-out** — `mode1_graph` uses the Send API to dispatch both agents in parallel; `mode3_graph` implements the debate loop
+- **Search fairness** — both agents always receive identical Tavily context; web search is not an advantage for either side
+- **Score-based winner** — a backend `_correct_winner()` function overrides the LLM's declared winner if the numeric scores disagree
+- **Task cancellation** — all three modes cancel pending LLM tasks on WebSocket disconnect to avoid orphaned API calls
