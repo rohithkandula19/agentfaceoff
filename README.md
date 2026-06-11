@@ -1,11 +1,11 @@
-> **⚠️ All Rights Reserved.** This repository is published for viewing and portfolio purposes only. The code is **not** open source — reuse, redistribution, modification, or derivative works are not permitted without written permission. See [LICENSE](./LICENSE).
+> **⚠️ All Rights Reserved.** This repository is published for viewing and portfolio purposes only. The code is **not** open source: reuse, redistribution, modification, or derivative works are not permitted without written permission. See [LICENSE](./LICENSE).
 <div align="center">
 
 # ⚔️ AgentFaceOff
 
 **Two AI agents. One prompt. One winner.**
 
-A live LLM evaluation platform where models battle head-to-head in real time — with WebSocket streaming, an LLM judge, and a structured rubric verdict.
+A live LLM evaluation platform where models battle head-to-head in real time, with WebSocket streaming, an LLM judge, and a structured rubric verdict.
 
 [![Live Demo](https://img.shields.io/badge/Live%20Demo-agent--face--off.web.app-orange?style=for-the-badge)](https://agent-face-off.web.app)
 [![Backend](https://img.shields.io/badge/Backend-Cloud%20Run-blue?style=for-the-badge&logo=googlecloud)](https://agentfaceoff-backend-ksknjekvfa-uc.a.run.app/health)
@@ -17,28 +17,28 @@ A live LLM evaluation platform where models battle head-to-head in real time —
 
 ## What it does
 
-AgentFaceOff sends the same prompt to two AI agents simultaneously, streams their responses live side-by-side, then calls an LLM judge to score each response on **accuracy, reasoning, clarity, and completeness** — and picks a winner.
+AgentFaceOff sends the same prompt to two AI agents simultaneously, streams their responses live side-by-side, then calls an LLM judge to score each response on **accuracy, reasoning, clarity, and completeness**, and picks a winner.
 
 ### Battle Modes
 
 | Mode | Description |
 |------|-------------|
-| **Model vs Model** | Same prompt, different models — streamed in parallel via LangGraph |
+| **Model vs Model** | Same prompt, different models, streamed in parallel via LangGraph |
 | **Strategy vs Strategy** | Same model, different system prompts (ReAct vs Plan-and-Execute, etc.) |
 | **Adversarial Debate** | Multi-round critique and refinement between two agents |
 
 ### Features
 
-- **Live token streaming** — responses appear character-by-character in a split-screen
-- **Live web search** — Tavily fetches real-time context injected into both agents equally
-- **Search image strip** — images from web results displayed above the response panes
-- **Blind mode** — models hidden until you vote; see if your intuition matches the judge
-- **Dual-pass judging** — two independent judge calls eliminate position bias
-- **Follow-up chat** — continue the conversation with both agents after the verdict
-- **Battle history** — every battle persisted to Postgres with share-via-URL
-- **Leaderboard** — win/loss/tie stats per model across all battles
-- **Auth** — JWT-based signup/login; history and leaderboard gated to logged-in users
-- **Rate limiting** — per-IP daily cap to prevent abuse
+- **Live token streaming**: responses appear character-by-character in a split-screen
+- **Live web search**: Tavily fetches real-time context injected into both agents equally
+- **Search image strip**: images from web results displayed above the response panes
+- **Blind mode**: models hidden until you vote; see if your intuition matches the judge
+- **Dual-pass judging**: two independent judge calls eliminate position bias
+- **Follow-up chat**: continue the conversation with both agents after the verdict
+- **Battle history**: every battle persisted to Postgres with share-via-URL
+- **Leaderboard**: win/loss/tie stats per model across all battles
+- **Auth**: JWT-based signup/login; history and leaderboard gated to logged-in users
+- **Rate limiting**: per-IP daily cap to prevent abuse
 
 ---
 
@@ -59,9 +59,9 @@ AgentFaceOff sends the same prompt to two AI agents simultaneously, streams thei
 
 ## Model Lineup
 
-29 free models across two providers — see [`backend/app/models/registry.py`](backend/app/models/registry.py) for the full list.
+29 free models across two providers. See [`backend/app/models/registry.py`](backend/app/models/registry.py) for the full list.
 
-**Groq (4 — fastest, sub-second first token):**
+**Groq (4: fastest, sub-second first token):**
 Llama 4 Scout · Llama 3.3 70B · Llama 3.1 8B · Qwen3 32B
 
 **OpenRouter free tier (25):**
@@ -72,7 +72,7 @@ Llama 4 Scout · Llama 3.3 70B · Llama 3.1 8B · Qwen3 32B
 - OpenAI: gpt-oss-120b, gpt-oss-20b
 - Plus Hermes 3 405B, GLM 4.5 Air, MiniMax M2.5, Tencent Hy3, Ling 2.6 1T, Poolside Laguna XS.2/M.1, LFM2.5 Thinking/Instruct, Venice Uncensored
 
-> **Performance tip:** Groq models stream in ~1–2s. OpenRouter free models share rate-limited capacity and can take 30–90s on the first response — pick Groq on both sides for snappy battles.
+> **Performance tip:** Groq models stream in ~1–2s. OpenRouter free models share rate-limited capacity and can take 30–90s on the first response: pick Groq on both sides for snappy battles.
 
 Default judge: **Llama 3.1 8B (Groq)**
 
@@ -88,7 +88,7 @@ agentfaceoff/
 │   │   ├── judge/         # call_judge, Verdict schema, dual-pass bias mitigation
 │   │   ├── graphs/        # mode1.py (Send API fan-out), mode3.py (debate loop)
 │   │   ├── models/        # MODEL_REGISTRY with FREE/PAID tiers
-│   │   ├── services/      # search.py — Tavily parallel text + image fetch
+│   │   ├── services/      # search.py - Tavily parallel text + image fetch
 │   │   ├── api/           # ws_battles.py (WebSocket), battles.py (REST + history)
 │   │   ├── auth/          # JWT router, bcrypt utils, schemas
 │   │   ├── db/            # SQLAlchemy 2.0 async models, crud, session
@@ -147,8 +147,8 @@ DATABASE_URL=postgresql://agentfaceoff:agentfaceoff@localhost:5432/agentfaceoff
 APP_ENV=development
 ALLOWED_ORIGINS=http://localhost:5173
 JWT_SECRET=any-random-string-for-local-dev
-TAVILY_API_KEY=tvly-...        # optional — web search
-OPENROUTER_API_KEY=sk-or-...   # optional — extra models
+TAVILY_API_KEY=tvly-...        # optional - web search
+OPENROUTER_API_KEY=sk-or-...   # optional - extra models
 ```
 
 ```bash
@@ -183,7 +183,7 @@ gcloud auth login        # use your GCP account
 bash setup-gcp.sh        # creates Cloud SQL, Secret Manager entries, IAM roles
 ```
 
-The script will prompt for your API keys and a DB password — everything else is automated.
+The script will prompt for your API keys and a DB password. Everything else is automated.
 
 ### Deploy backend
 
@@ -235,19 +235,19 @@ firebase deploy --only hosting
 1. Both agents receive the same prompt simultaneously
 2. Responses are streamed live over WebSocket
 3. Once both finish, a judge LLM scores each response on four dimensions (0–10 each):
-   - **Accuracy** — factual correctness
-   - **Reasoning** — logical depth and structure
-   - **Clarity** — readability and organisation
-   - **Completeness** — coverage of the question
+   - **Accuracy**: factual correctness
+   - **Reasoning**: logical depth and structure
+   - **Clarity**: readability and organisation
+   - **Completeness**: coverage of the question
 4. The agent with the higher total score wins. A tie is declared only when scores are exactly equal.
-5. **Dual-pass mode** runs two independent judge calls with reversed agent order — the verdict is accepted only when both agree, eliminating position bias.
+5. **Dual-pass mode** runs two independent judge calls with reversed agent order: the verdict is accepted only when both agree, eliminating position bias.
 
 ---
 
 ## Architecture Notes
 
-- **WebSocket state machine** — `useBattle.ts` uses `useReducer` with phases: `idle → connecting → searching → streaming → judging → verdict`
-- **LangGraph fan-out** — `mode1_graph` uses the Send API to dispatch both agents in parallel; `mode3_graph` implements the debate loop
-- **Search fairness** — both agents always receive identical Tavily context; web search is not an advantage for either side
-- **Score-based winner** — a backend `_correct_winner()` function overrides the LLM's declared winner if the numeric scores disagree
-- **Task cancellation** — all three modes cancel pending LLM tasks on WebSocket disconnect to avoid orphaned API calls
+- **WebSocket state machine**: `useBattle.ts` uses `useReducer` with phases: `idle → connecting → searching → streaming → judging → verdict`
+- **LangGraph fan-out**: `mode1_graph` uses the Send API to dispatch both agents in parallel; `mode3_graph` implements the debate loop
+- **Search fairness**: both agents always receive identical Tavily context; web search is not an advantage for either side
+- **Score-based winner**: a backend `_correct_winner()` function overrides the LLM's declared winner if the numeric scores disagree
+- **Task cancellation**: all three modes cancel pending LLM tasks on WebSocket disconnect to avoid orphaned API calls
